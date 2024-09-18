@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using MCLauncher.WPFDataTypes;
 
 namespace MCLauncher {
     public class VersionList : ObservableCollection<WPFDataTypes.Version> {
@@ -60,7 +62,15 @@ namespace MCLauncher {
         public async Task LoadImported() {
             string[] subdirectoryEntries = await Task.Run(() => Directory.Exists(_importedDirectory) ? Directory.GetDirectories(_importedDirectory) : Array.Empty<string>());
             foreach (string subdirectory in subdirectoryEntries) {
-                AddEntry(Path.GetFileName(subdirectory), subdirectory);
+                try
+                {
+                    var version = FileVersionInfo.GetVersionInfo(subdirectory + "\\Minecraft.Windows.exe");
+                    AddEntry(version.FileVersion, subdirectory);
+                }
+                catch (Exception ex)
+                {
+                    AddEntry(Path.GetFileName(subdirectory), subdirectory);
+                }
             }
         }
 
